@@ -1,0 +1,30 @@
+.sensorBorder{
+  border: 1px solid black;
+  margin: 15px 10px;
+}
+
+.sensorContainer{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.sensorName{
+  margin: 0px 20px;
+  font-size: 1.225em;
+  text-align: center;
+}
+
+.sensorValue{
+  margin: 2px 20px 10px 20px;
+  font-size: 2em;
+  text-align: center;
+}
+
+h2{
+  margin: 10px 20px;
+}
+
+h3{
+  margin: 10px;
+}
