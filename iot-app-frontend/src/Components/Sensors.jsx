@@ -8,13 +8,14 @@ class Sensors extends Component {
   }
   render() { 
     return ( 
-      <div class='sensorBorder'>
-        <h3>Sensor {this.props.id}</h3>
-        <div class='sensorContainer'>
-          {this.props.values.map(value => 
-            <div>
-              <div class='sensorName'>{value.name}</div>
-              <div class='sensorValue'>{value.value}</div>
+      <div className='sensorBorder'>
+        <h3>{this.props.name}</h3>
+        <p>Sensor ID: {this.props.keys}</p>
+        <div className='sensorContainer'>
+          {this.props.sensors.map((value, index) => 
+            <div key={index}>
+              <div className='sensorName'>{value.sensorName}</div>
+              <div className='sensorValue'>{value.value} {value.unit}</div>
             </div>
           )}
         </div>
