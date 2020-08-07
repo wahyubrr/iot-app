@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser')
 const app = express();
 const port = 4000;
 
@@ -7,6 +8,8 @@ const url = "mongodb://localhost:27017/";
 
 let cors = require('cors');
 const { ObjectID, ObjectId } = require('mongodb');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(cors());
 
 let currentValue1 = 0;
@@ -25,25 +28,42 @@ app.get('/api', function(req, res) {
   }); 
 })
 
-app.post('/api', async function(req, res) {
+app.post('/api/post-sensor-data', async function(req, res) {
   MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     var dbo = db.db("iot-app-db");
-    if(ObjectId.isValid(req.query.id)) {
-      var myquery = { _id: new ObjectId(req.query.id) };
-      var newvalues = { $set : {'sensors.0.value' : req.query.var1} };
-      dbo.collection("sensors").updateOne(myquery, newvalues, function(err, res) {
-        if (err) throw err;
-      });
-      var newvalues = { $set : {'sensors.1.value' : req.query.var2} };
+    if(ObjectId.isValid(req.body.sensorid)) {
+      var myquery = { _id: new ObjectId(req.body.sensorid) };
+      var newvalues = { $set : {'sensors.0.value' : req.body.value1} };
       dbo.collection("sensors").updateOne(myquery, newvalues, function(err, res) {
         if (err) throw err;
         db.close();
       });
-      console.log("1 document updated");
     }
     else {
-      console.log("Warning: ObjectId not valid");
+     console.log("Warning: ObjectId not valid");
+    }
+  });
+})
+
+app.post('/api/submit-form-batas', async function(req, res) {
+  MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("iot-app-db");
+    if(ObjectId.isValid(req.body.sensorid)) {
+      var myquery = { _id: new ObjectId(req.body.sensorid) };
+      var newvalues = { $set : {'sensors.1.value' : req.body.value1} };
+      dbo.collection("sensors").updateOne(myquery, newvalues, function(err, res) {
+        if (err) throw err;
+      });
+      var newvalues = { $set : {'sensors.2.value' : req.body.value2} };
+      dbo.collection("sensors").updateOne(myquery, newvalues, function(err, res) {
+        if (err) throw err;
+        db.close();
+      });
+    }
+    else {
+     console.log("Warning: ObjectId not valid");
     }
   });
 })
