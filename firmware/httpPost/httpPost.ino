@@ -11,6 +11,16 @@
 
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WebServer.h>
+#include <ArduinoJson.h>
+#include <FreeRTOS.h>
+
+
+WebServer server(80);
+
+// JSON data buffer
+StaticJsonDocument<250> jsonDocument;
+char buffer[250];
 
 const char* ssid = "Nurul Kartika";
 const char* password = "14101971";
@@ -19,16 +29,30 @@ const char* password = "14101971";
 const int trigPin = 2;
 const int echoPin = 5;
 
+const int stbyPin = 13;
+const int Ain1Pin = 12; // GROUND
+const int Ain2Pin = 14; // RED
+
 // defines variables
 long duration;
-int distance;
+int distance, waterLevel = 0;
+int batasAtas = 0, batasBawah = 0;
+bool pumpOn = false;
 
 //Your Domain name with URL path or IP address with path
 const char* serverName = "http://192.168.1.9:4000/api/post-sensor-data";
 
 void setup() {
-  Serial.begin(115200);
+  // Motor setup
+  pinMode(stbyPin,OUTPUT);
+  pinMode(Ain1Pin,OUTPUT);
+  pinMode(Ain2Pin,OUTPUT);
 
+  digitalWrite(stbyPin, LOW);
+  digitalWrite(Ain1Pin, LOW);
+  digitalWrite(Ain2Pin, HIGH);
+  
+  Serial.begin(115200);
   WiFi.begin(ssid, password);
   Serial.println("Connecting");
   while(WiFi.status() != WL_CONNECTED) {
@@ -43,27 +67,51 @@ void setup() {
 
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+
+  setupTask();
+  setupRouting();
 }
 
-void loop() {
+void setupRouting() {
+  server.on("/update_batas", HTTP_POST, handlePost);
+
+  // start server
+  server.begin();
+}
+
+void handlePost() {
+  if (server.hasArg("plain") == false) {
+    //handle error here
+  }
+  String body = server.arg("plain");
+  deserializeJson(jsonDocument, body);
+  
+  // Get RGB components
+  batasAtas = atoi(jsonDocument["value1"]);
+  batasBawah = atoi(jsonDocument["value2"]);
+  Serial.print("batas atas: ");
+  Serial.println(batasAtas);
+  Serial.print("batas bawah: ");
+  Serial.println(batasBawah);
+  
+  // Respond to the client
+  server.send(200, "application/json", "{}");
+}
+
+void postMeasurement(void *pvParameters) {
   String sensorid = "5ef9cdadaa019958751a8306";
   int tinggiBak = 41;
-  int value1 = tinggiBak - getDistance();
-  httpPost(sensorid, value1);
-  delay(1000);
-//  float value1 = 52, value2 = 20.5, increment = 1.25;
-//  for(int i = 0; i < 15; i++) {
-//    value1 = value1 + increment;
-//    value2 = value2 + increment;
-//    httpPost(sensorid, value1, value2);
-//    delay(1000);
-//  }
-//  for(int i = 15; i >= 0; i--) {
-//    value1 = value1 - increment;
-//    value2 = value2 - increment;
-//    httpPost(sensorid, value1, value2);
-//    delay(1000);
-//  }
+  for(;;) {
+    int value1 = tinggiBak - getDistance();
+    waterLevel = value1;
+    if (value1 < 0) {
+      value1 = 0;
+    }
+    Serial.print("Tinggi air: ");
+    Serial.println(value1);
+    httpPost(sensorid, value1);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+  }
 }
 
 void httpPost(String sensorid, float value1) {
@@ -100,6 +148,7 @@ int getDistance() {
 
   // Sets the trigPin on HIGH state for 10 micro seconds
   digitalWrite(trigPin, HIGH);
+  
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
@@ -114,4 +163,45 @@ int getDistance() {
   Serial.println(distance);
   
   return distance;
+}
+
+void refillTank(void *pvParameters) {
+  for(;;) {
+    if (waterLevel < batasBawah) {
+      pumpOn = true;
+    } else if (waterLevel >= batasAtas) {
+      pumpOn = false;
+    }
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+  }
+}
+
+void setupTask() {
+  xTaskCreate(     
+  postMeasurement,      
+  "Post measurement data",      
+  8192,      
+  NULL,      
+  2,     
+  NULL     
+  );
+  xTaskCreate(     
+  refillTank,      
+  "Operate Water Pump",      
+  4096,      
+  NULL,      
+  1,     
+  NULL     
+  ); 
+}
+
+void loop() {
+  server.handleClient();
+  if (pumpOn) {
+    digitalWrite(trigPin,HIGH);
+    digitalWrite(stbyPin,HIGH);
+  } else {
+    digitalWrite(trigPin,LOW);
+    digitalWrite(stbyPin,LOW);
+  }
 }

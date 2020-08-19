@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser')
+const axios = require('axios')
 const app = express();
 const port = 4000;
 
@@ -39,6 +40,7 @@ app.post('/api/post-sensor-data', async function(req, res) {
         if (err) throw err;
         db.close();
       });
+      res.status(200).send('OK');
     }
     else {
      console.log("Warning: ObjectId not valid");
@@ -61,6 +63,17 @@ app.post('/api/submit-form-batas', async function(req, res) {
         if (err) throw err;
         db.close();
       });
+      axios.post('http://192.168.1.12/update_batas', {
+        value1: req.body.value1,
+        value2: req.body.value2
+      })
+      .then((res) => {
+        console.log(`statusCode: ${res.statusCode}`)
+        console.log(res)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
     }
     else {
      console.log("Warning: ObjectId not valid");
