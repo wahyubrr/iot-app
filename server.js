@@ -63,7 +63,7 @@ app.post('/api/submit-form-batas', async function(req, res) {
         if (err) throw err;
         db.close();
       });
-      axios.post('http://192.168.1.12/update_batas', {
+      axios.post('http://192.168.1.11/update_batas', {
         value1: req.body.value1,
         value2: req.body.value2
       })
