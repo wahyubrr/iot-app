@@ -19,7 +19,7 @@ class Dashboard extends Component {
   async componentDidMount() {
     try {
       setInterval(async () => {
-        axios.get('http://192.168.1.9:4000/api')
+        axios.get('http://192.168.0.11:4000/api')
         .then(response => {
           this.setState({sensors: response.data})
         })
@@ -51,7 +51,7 @@ class Dashboard extends Component {
     };
 
     if ( parseInt(this.state.value1) > parseInt(this.state.value2) ) {
-      axios.post('http://192.168.1.9:4000/api/submit-form-batas', user)
+      axios.post('http://192.168.0.11:4000/api/submit-form-batas', user)
       .then(res => {
         console.log(res);
         console.log(res.data);

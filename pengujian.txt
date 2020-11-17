@@ -1,0 +1,37 @@
+7.1.2 Pengujian Pengiriman Data Sensor ke Server Utama
+Post time: 1679 ms
+Post time: 227 ms
+Post time: 38 ms
+Post time: 35 ms
+Post time: 24 ms
+Post time: 25 ms
+Post time: 34 ms
+Post time: 3955 ms
+Post time: 4902 ms
+Post time: 46 ms
+Post time: 34 ms
+Post time: 2695 ms
+
+7.1.3 Pengujian Request Data dari User Interface terhadap Server Utama
+1     1 ms
+2     3 ms
+3     7 ms
+4     2 ms
+5     1 ms
+6     5 ms
+7     4 ms
+8     3 ms
+9     5 ms
+10    1 ms
+
+7.1.4 Pengujian Request Perubahan Batas Atas dan Batas Bawah
+1     1040 ms
+2     760 ms
+3     600 ms
+4     550 ms
+5     610 ms
+6     470 ms
+7     460 ms
+8     540 ms
+9     810 ms
+10    850 ms

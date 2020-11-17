@@ -11,8 +11,8 @@ WebServer server(80);
 StaticJsonDocument<250> jsonDocument;
 char buffer[250];
 
-const char* ssid = "Nurul Kartika";
-const char* password = "14101971";
+const char* ssid = "Watu Gong 36";
+const char* password = "watugong36";
 
 // defines pins numbers
 const int trigPin = 2;
@@ -29,7 +29,7 @@ int batasAtas = 0, batasBawah = 0;
 bool pumpOn = false;
 
 //Your Domain name with URL path or IP address with path
-const char* serverName = "http://192.168.1.9:4000/api/post-sensor-data";
+const char* serverName = "http://192.168.0.11:4000/api/post-sensor-data";
 
 void setup() {
   // Motor setup
@@ -82,6 +82,8 @@ void handlePost() {
   Serial.println(batasAtas);
   Serial.print("batas bawah: ");
   Serial.println(batasBawah);
+
+  Serial.println("Pesan telah sampai");
   
   // Respond to the client
   server.send(200, "application/json", "{}");
@@ -98,7 +100,13 @@ void postMeasurement(void *pvParameters) {
     }
     Serial.print("Tinggi air: ");
     Serial.println(value1);
+    
+    int postTime = millis();
     httpPost(sensorid, value1);
+    int doneTime = millis();
+    postTime = doneTime - postTime;
+    Serial.print("Post time: ");
+    Serial.println(postTime);
     vTaskDelay(5000 / portTICK_PERIOD_MS);
   }
 }

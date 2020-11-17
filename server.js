@@ -39,6 +39,8 @@ app.post('/api/post-sensor-data', async function(req, res) {
       dbo.collection("sensors").updateOne(myquery, newvalues, function(err, res) {
         if (err) throw err;
         db.close();
+
+        //console.log("Data diterima    " + req.body.value1);
       });
       res.status(200).send('OK');
     }
@@ -63,7 +65,7 @@ app.post('/api/submit-form-batas', async function(req, res) {
         if (err) throw err;
         db.close();
       });
-      axios.post('http://192.168.1.11/update_batas', {
+      axios.post('http://192.168.0.18/update_batas', {
         value1: req.body.value1,
         value2: req.body.value2
       })
